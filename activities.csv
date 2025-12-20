@@ -1,0 +1,6 @@
+id,activity_id,activity,qty,items,rate_rule,amount,comment,created_by,time_date
+1,ACT-YZJXKV,Survey Drawing,1.0,2,per list item,100.0,,I8XVE,2025-12-17 03:44:01.931855
+2,ACT-UWK151,Registration D2,1.0,3,per list item,3.0,,I8XVE,2025-12-17 03:44:38.955859
+3,ACT-UTMGW7,Survey Drawing,2.0,3,per quantity,400.0,,I8XVE,2025-12-17 13:31:30.825847
+4,ACT-JIPGXC,Survey Drawing,1.0,6,per quantity,90.0,,I8XVE,2025-12-17 21:34:52.930950
+5,ACT-3TDQRO,Survey Drawing,1.0,2,per list item,100.0,,V9E8A,2025-12-17 22:20:26.156162
