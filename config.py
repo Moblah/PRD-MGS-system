@@ -1,5 +1,7 @@
 import os
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = "sqlite:///app.db"
+    # Get Render's PostgreSQL URL, fallback to SQLite for local dev
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', '').replace(
+        'postgres://', 'postgresql://') or 'sqlite:///app.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
