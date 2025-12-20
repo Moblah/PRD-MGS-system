@@ -1,6 +1,10 @@
 Flask==3.0.3
 Flask-Cors==5.0.0
 Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-Migrate==4.0.5
 gunicorn==23.0.0
-psycopg[binary]==3.2.4  # Works with ANY Python version
+psycopg2-binary==2.9.9  # CHANGED BACK to psycopg2-binary
+SQLAlchemy==2.0.45
+greenlet==3.1.1
 python-dotenv==1.0.1
