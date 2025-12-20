@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "abr_id": "ABR-Y7UXR",
+    "name": "Registration D2",
+    "applies_to": "D2",
+    "rule": "per entry",
+    "rate": 3.0,
+    "from_date": "2025-12-17",
+    "created_by": "ADMIN-01",
+    "time": "2025-12-17 13:29:16.445722"
+  },
+  {
+    "id": 2,
+    "abr_id": "ABR-L7QIY",
+    "name": "Survey Drawing",
+    "applies_to": "PN",
+    "rule": "per quantity",
+    "rate": 100.0,
+    "from_date": "2025-12-17",
+    "created_by": "ADMIN-01",
+    "time": "2025-12-17 13:30:48.905687"
+  }
+]

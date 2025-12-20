@@ -1,0 +1,12 @@
+LOAD DATABASE
+    FROM sqlite:////home/meshack/PRD-MGS-system/instance/app.db
+    INTO postgresql://prd_mgs_db_user:0JZw5TbA6M38n0NxVxaopmWsBd4o1hRc@dpg-d532seer433s73c30tng-a:5432/prd_mgs_db
+    
+WITH include drop, create tables, create indexes, reset sequences,
+     workers = 8, concurrency = 1
+    
+SET maintenance_work_mem to '128MB',
+    work_mem to '12MB'
+    
+CAST type datetime to timestamptz drop default drop not null using zero-dates-to-null,
+     type date drop default drop not null using zero-dates-to-null;

@@ -1,0 +1,14 @@
+# Change the INTO line to your actual URL
+# Should look like: INTO postgresql://prd_mgs_db_user:abc123@dpg-cn8vj6t1hbls73fbpg50-a:5432/prd_mgs_dbLOAD DATABASE
+    FROM sqlite:////home/meshack/PRD-MGS-system/instance/app.db
+    INTO postgresql://user:password@host:5432/database_name
+postgresql://prd_mgs_db_user:0JZw5TbA6M38n0NxVxaopmWsBd4o1hRc@dpg-d532seer433s73c30tng-a/prd_mgs_db
+    
+WITH include drop, create tables, create indexes, reset sequences,
+     workers = 8, concurrency = 1
+    
+SET maintenance_work_mem to '128MB',
+    work_mem to '12MB'
+    
+CAST type datetime to timestamptz drop default drop not null using zero-dates-to-null,
+     type date drop default drop not null using zero-dates-to-null;

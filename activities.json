@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "activity_id": "ACT-YZJXKV",
+    "activity": "Survey Drawing",
+    "qty": 1.0,
+    "items": "2",
+    "rate_rule": "per list item",
+    "amount": 100.0,
+    "comment": "",
+    "created_by": "I8XVE",
+    "time_date": "2025-12-17 03:44:01.931855"
+  },
+  {
+    "id": 2,
+    "activity_id": "ACT-UWK151",
+    "activity": "Registration D2",
+    "qty": 1.0,
+    "items": "3",
+    "rate_rule": "per list item",
+    "amount": 3.0,
+    "comment": "",
+    "created_by": "I8XVE",
+    "time_date": "2025-12-17 03:44:38.955859"
+  },
+  {
+    "id": 3,
+    "activity_id": "ACT-UTMGW7",
+    "activity": "Survey Drawing",
+    "qty": 2.0,
+    "items": "3",
+    "rate_rule": "per quantity",
+    "amount": 400.0,
+    "comment": "",
+    "created_by": "I8XVE",
+    "time_date": "2025-12-17 13:31:30.825847"
+  },
+  {
+    "id": 4,
+    "activity_id": "ACT-JIPGXC",
+    "activity": "Survey Drawing",
+    "qty": 1.0,
+    "items": "6",
+    "rate_rule": "per quantity",
+    "amount": 90.0,
+    "comment": "",
+    "created_by": "I8XVE",
+    "time_date": "2025-12-17 21:34:52.930950"
+  },
+  {
+    "id": 5,
+    "activity_id": "ACT-3TDQRO",
+    "activity": "Survey Drawing",
+    "qty": 1.0,
+    "items": "2",
+    "rate_rule": "per list item",
+    "amount": 100.0,
+    "comment": "",
+    "created_by": "V9E8A",
+    "time_date": "2025-12-17 22:20:26.156162"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "user_alnum": "EMP-002",
+    "name": "jay",
+    "username_email": "jay@mail.com",
+    "password": "scrypt:32768:8:1$filTfqoJbCx9jP2m$eb29126e5aa26d60122f1b4698ee6c1515ec10b189c532d20a0e3ab9c3ac4e4dde928d96a9a7eba7e06cebd274354695f18032a172e3810f7104447514988441",
+    "role": "admin",
+    "status": "Active",
+    "team": "Field Operations"
+  },
+  {
+    "id": 2,
+    "user_alnum": "I8XVE",
+    "name": "son",
+    "username_email": "son@mail.com",
+    "password": "scrypt:32768:8:1$XaFjFnrkhn7jq8jg$02128c7aeebe28ff63b6eb1ed95869e484a882aa9e3760f7acf592161ef19a30282c89cfb0beaf53c184f81b4448a05751269661cb42daf419509588b868edd4",
+    "role": "Employee",
+    "status": "Active",
+    "team": "Field"
+  },
+  {
+    "id": 3,
+    "user_alnum": "V9E8A",
+    "name": "jane",
+    "username_email": "jane@mail.com",
+    "password": "scrypt:32768:8:1$BLRomMiM9wieNfKf$ed5c896765d16aa07641e8e25bc2f115aeba2dd9d0782662327d269214c2b7a6e06b30d3a79bb2cad1511c894ab064e262e29a9dc7dfa20d74cae10eec429d5a",
+    "role": "Employee",
+    "status": "Active",
+    "team": "Office"
+  }
+]
