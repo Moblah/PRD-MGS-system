@@ -1,20 +1,39 @@
-from flask import Blueprint, request, jsonify
-from models.user import db
-from models.activity import Activity
-import string
-import random
+# Add these routes to your existing backend
 
-employee_today = Blueprint('employee_today', __name__)
+@employee_today.route("/api/abr", methods=["GET"])
+def get_abr_data():
+    """Get all ABR (Activity Based Rates) data"""
+    try:
+        # Assuming you have an ABR model
+        from models.abr import ABR
+        abr_data = ABR.query.all()
+        return jsonify([{
+            'name': item.name,
+            'rate': item.rate,
+            'applies_to': item.applies_to
+        } for item in abr_data]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-# Helper to generate ACT-ID if not using the one from utils
-def generate_act_id():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+@employee_today.route("/api/users/<string:user_alnum>", methods=["GET"])
+def get_user_by_alnum(user_alnum):
+    """Get user details by alnum"""
+    try:
+        from models.user import User
+        user = User.query.filter_by(user_alnum=user_alnum).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        
+        return jsonify({
+            'user_alnum': user.user_alnum,
+            'full_name': user.full_name,
+            'email': user.email,
+            'role': user.role
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-@employee_today.route("/api/employee/today/<string:user_alnum>", methods=["GET"])
-def get_activities(user_alnum):
-    activities = Activity.query.filter_by(created_by=user_alnum).all()
-    return jsonify([a.to_dict() for a in activities]), 200
-
+# You also need to modify the add_activity endpoint to include sole_type
 @employee_today.route("/api/employee/today", methods=["POST"])
 def add_activity():
     data = request.get_json()
@@ -23,11 +42,10 @@ def add_activity():
             activity_id=f"ACT-{generate_act_id()}",
             activity=data.get('activity'),
             qty=data.get('qty'),
-            items=data.get('items'),
-            rate_rule=data.get('rate_rule'),
             amount=data.get('amount'),
             comment=data.get('comment'),
-            created_by=data.get('created_by')
+            created_by=data.get('created_by'),
+            sole_type=data.get('sole_type', 'D2')  # Add this line
         )
         db.session.add(new_act)
         db.session.commit()
@@ -35,13 +53,3 @@ def add_activity():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-
-@employee_today.route("/api/employee/today/delete/<string:act_id>", methods=["DELETE"])
-def delete_activity(act_id):
-    activity = Activity.query.filter_by(activity_id=act_id).first()
-    if not activity:
-        return jsonify({"error": "Activity not found"}), 404
-    
-    db.session.delete(activity)
-    db.session.commit()
-    return jsonify({"message": "Deleted", "activity_id": act_id}), 200
