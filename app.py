@@ -16,7 +16,7 @@ from admin_section.monthly_reports.monthly_reports import monthly_reports_bp
 
 def create_app():
     """
-    Factory function to create Flask app
+    Factory function to create Flask app------------
     """
     app = Flask(__name__)
     app.config.from_object(Config)
