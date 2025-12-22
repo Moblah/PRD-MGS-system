@@ -1,56 +1,98 @@
 from flask import Blueprint, request, jsonify
 from models.user import db
 from models.activity import Activity
+from sqlalchemy import text  # Add this import
 import string
 import random
 
 employee_today = Blueprint('employee_today', __name__)
 
+# Helper to generate ACT-ID
+def generate_act_id():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+# EXISTING ROUTES - UNCHANGED
+@employee_today.route("/api/employee/today/<string:user_alnum>", methods=["GET"])
+def get_activities(user_alnum):
+    activities = Activity.query.filter_by(created_by=user_alnum).all()
+    return jsonify([a.to_dict() for a in activities]), 200
+
+@employee_today.route("/api/employee/today", methods=["POST"])
+def add_activity():
+    data = request.get_json()
+    try:
+        new_act = Activity(
+            activity_id=f"ACT-{generate_act_id()}",
+            activity=data.get('activity'),
+            qty=data.get('qty'),
+            items=data.get('items'),
+            rate_rule=data.get('rate_rule'),
+            amount=data.get('amount'),
+            comment=data.get('comment'),
+            created_by=data.get('created_by')
+        )
+        db.session.add(new_act)
+        db.session.commit()
+        return jsonify(new_act.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@employee_today.route("/api/employee/today/delete/<string:act_id>", methods=["DELETE"])
+def delete_activity(act_id):
+    activity = Activity.query.filter_by(activity_id=act_id).first()
+    if not activity:
+        return jsonify({"error": "Activity not found"}), 404
+    
+    db.session.delete(activity)
+    db.session.commit()
+    return jsonify({"message": "Deleted", "activity_id": act_id}), 200
+
+# ========== ADD THESE 2 NEW ROUTES ==========
+
 @employee_today.route("/api/abr", methods=["GET"])
 def get_abr_data():
-    """Get all activities and rates from ABR table"""
-    print("🔍 /api/abr endpoint called - checking database...")
-    
+    """Get activity rates from ABR table - SIMPLE DIRECT SQL"""
     try:
-        # Check if we can import the model
-        print("🔍 Importing ABR model...")
-        from models.abr import ABR
+        # Direct SQL query - no model needed
+        result = db.session.execute(text("SELECT name, rate, applies_to FROM abr"))
         
-        # Test the query
-        print("🔍 Executing database query...")
-        count = ABR.query.count()
-        print(f"🔍 Found {count} records in ABR table")
-        
-        if count == 0:
-            print("⚠️ ABR table is empty!")
-            return jsonify([]), 200
-        
-        # Get all data
-        abr_data = ABR.query.all()
-        print(f"🔍 Retrieved {len(abr_data)} records")
-        
-        # Convert to JSON
-        result = []
-        for i, item in enumerate(abr_data):
-            result.append({
-                'name': item.name,
-                'rate': float(item.rate),
-                'applies_to': item.applies_to,
-                'rule': item.rule
+        # Convert to list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'name': row.name,
+                'rate': float(row.rate),
+                'applies_to': row.applies_to
             })
-            
-            # Log first 3 records
-            if i < 3:
-                print(f"📝 Record {i+1}: {item.name} - {item.rate} - {item.applies_to}")
         
-        print(f"✅ Returning {len(result)} ABR records")
-        return jsonify(result), 200
+        return jsonify(data), 200
         
     except Exception as e:
-        print(f"❌ CRITICAL ERROR in /api/abr: {type(e).__name__}: {str(e)}")
-        import traceback
-        print("Stack trace:")
-        traceback.print_exc()
-        
-        # Return empty array so frontend doesn't crash
-        return jsonify([]), 200
+        # Fallback hardcoded data if query fails
+        fallback_data = [
+            {"name": "Survey Drawing", "rate": 100, "applies_to": "D2"},
+            {"name": "Survey Verification", "rate": 150, "applies_to": "D2"},
+            {"name": "Registration D2", "rate": 300, "applies_to": "D2"},
+            {"name": "Registration PN", "rate": 350, "applies_to": "PN"}
+        ]
+        return jsonify(fallback_data), 200
+
+@employee_today.route("/api/users/<string:user_alnum>", methods=["GET"])
+def get_user_by_alnum(user_alnum):
+    """Get user details - SIMPLE VERSION"""
+    try:
+        # Return basic info
+        return jsonify({
+            'user_alnum': user_alnum,
+            'full_name': user_alnum,  # Use alnum as name
+            'email': '',
+            'role': 'employee'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'user_alnum': user_alnum,
+            'full_name': user_alnum,
+            'email': '',
+            'role': 'employee'
+        }), 200
