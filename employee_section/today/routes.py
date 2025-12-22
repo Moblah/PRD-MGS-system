@@ -5,34 +5,38 @@ import string
 import random
 
 employee_today = Blueprint('employee_today', __name__)
+
+# ADD THESE 2 ROUTES TO YOUR BACKEND
+
 @employee_today.route("/api/abr", methods=["GET"])
 def get_abr_data():
-    """Get activity rates from ABR table"""
+    """Temporary hardcoded data - replace with database query later"""
     try:
-        # Make sure you have an ABR model
-        from models.abr import ABR
-        abr_data = ABR.query.all()
-        return jsonify([{
-            'name': item.name,
-            'rate': item.rate,
-            'applies_to': item.applies_to
-        } for item in abr_data]), 200
+        # For now, return hardcoded data
+        abr_data = [
+            {"name": "Survey Drawing", "rate": 100, "applies_to": "D2"},
+            {"name": "Survey Verification", "rate": 80, "applies_to": "D2"},
+            {"name": "Survey Masterfile", "rate": 120, "applies_to": "D2"},
+            {"name": "Registration D2", "rate": 150, "applies_to": "D2"},
+            {"name": "Registration PN", "rate": 180, "applies_to": "PN"},
+            {"name": "Uploading Bulk", "rate": 90, "applies_to": "D2"},
+            {"name": "Uploading single file", "rate": 50, "applies_to": "D2"}
+        ]
+        return jsonify(abr_data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @employee_today.route("/api/users/<string:user_alnum>", methods=["GET"])
 def get_user_by_alnum(user_alnum):
-    """Get user details by alnum"""
+    """Get user details - return basic info for now"""
     try:
-        user = User.query.filter_by(user_alnum=user_alnum).first()
-        if not user:
-            return jsonify({"error": "User not found"}), 404
-        
+        # For now, just return the alnum as the name
+        # Later you can query your User table
         return jsonify({
-            'user_alnum': user.user_alnum,
-            'full_name': user.full_name,
-            'email': user.email,
-            'role': user.role
+            'user_alnum': user_alnum,
+            'full_name': user_alnum,  # Just use alnum as name for now
+            'email': 'user@example.com',
+            'role': 'employee'
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
