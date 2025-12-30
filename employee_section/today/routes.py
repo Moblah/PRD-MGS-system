@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models.user import db, User  # Ensure User model is imported
+from models.user import db, User
 from models.activity import Activity
 from sqlalchemy import text
 import string, random
@@ -11,28 +11,29 @@ def generate_act_id():
 
 @employee_today.route("/api/employee/today/<string:user_alnum>", methods=["GET"])
 def get_activities(user_alnum):
-    # Get date from query string, default to None (all time) or specific date
+    # Filter by date from frontend
     target_date = request.args.get('date')
+    
     query = Activity.query.filter_by(created_by=user_alnum)
     
     if target_date:
-        # Filter activities by the created_at date part
-        query = query.filter(db.func.date(Activity.created_at) == target_date)
+        # Match time_date column in your database
+        query = query.filter(db.func.date(Activity.time_date) == target_date)
     
-    activities = query.order_by(Activity.created_at.desc()).all()
+    activities = query.order_by(Activity.time_date.desc()).all()
     return jsonify([a.to_dict() for a in activities]), 200
 
 @employee_today.route("/api/users/<string:user_alnum>", methods=["GET"])
 def get_user_by_alnum(user_alnum):
-    # Try to find actual user name from database
+    # Matches your User table structure
     user = User.query.filter_by(user_alnum=user_alnum).first()
     if user:
         return jsonify({
             'user_alnum': user.user_alnum,
-            'full_name': user.full_name,
+            'name': user.name, # Corrected field name
             'role': user.role
         }), 200
-    return jsonify({'full_name': user_alnum}), 200 # Fallback
+    return jsonify({'name': user_alnum}), 200
 
 @employee_today.route("/api/employee/today", methods=["POST"])
 def add_activity():
@@ -41,7 +42,7 @@ def add_activity():
         new_act = Activity(
             activity_id=generate_act_id(),
             activity=data.get('activity'),
-            qty=data.get('qty'),
+            qty=data.get('qty'), # This will now display correctly
             amount=data.get('amount'),
             comment=data.get('comment'),
             created_by=data.get('created_by')
