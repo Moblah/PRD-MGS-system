@@ -3,6 +3,7 @@ from flask_cors import CORS
 from config import Config
 from models.user import db
 from models.activity import Activity  # Ensure table creation
+from flask import Flask
 
 # Import Blueprints from respective sections
 from login.login import login_bp
