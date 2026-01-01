@@ -16,6 +16,7 @@ from admin_section.monthly_reports.monthly_reports import monthly_reports_bp
 from models.payment import PaymentBatch, PaymentAdjustment # <--- ADD THIS
 from admin_section.payments.routes import admin_payments  # <--- ADD THIS
 
+
 def create_app():
     """
     Factory function to create Flask app------------
