@@ -43,10 +43,13 @@ def get_payouts(year, month):
 def record_payment():
     data = request.json
     try:
+        # Debug print to see what exactly is arriving in Render logs
+        print(f"Received payment data: {data}")
+
         new_pay = PaymentTransaction(
-            user_alnum=data['user_alnum'],
-            amount_paid=float(data['amount']),
-            batch_period=data['period'],
+            user_alnum=str(data.get('user_alnum')),
+            amount_paid=float(data.get('amount', 0)),
+            batch_period=str(data.get('period')), # Ensures it's a string like "1-2026"
             reference=data.get('reference', 'Admin Payout')
         )
         db.session.add(new_pay)
@@ -54,4 +57,5 @@ def record_payment():
         return jsonify({"status": "success"}), 201
     except Exception as e:
         db.session.rollback()
+        print(f"Error recording payment: {str(e)}")
         return jsonify({"error": str(e)}), 400
