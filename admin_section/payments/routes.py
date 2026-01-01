@@ -4,7 +4,7 @@ from models.activity import Activity
 from models.payment import PaymentBatch, PaymentAdjustment
 from flask_cors import cross_origin
 
-admin_payments = db.Blueprint('admin_payments', __name__)
+admin_payments = Blueprint('admin_payments', __name__)
 
 @admin_payments.route("/api/admin/payments/batches", methods=["GET"])
 @cross_origin()
