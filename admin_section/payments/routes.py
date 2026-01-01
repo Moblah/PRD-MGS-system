@@ -1,5 +1,3 @@
-# admin_section/payments/routes.py
-
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 from sqlalchemy import func, extract
@@ -7,7 +5,6 @@ from models.user import db, User
 from models.activity import Activity
 from models.payment import PaymentTransaction
 
-# CORRECT: Blueprint comes from 'flask', not 'db'
 admin_payments = Blueprint('admin_payments', __name__)
 
 @admin_payments.route("/api/admin/payouts/<int:year>/<int:month>", methods=["GET"])
