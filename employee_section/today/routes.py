@@ -59,8 +59,23 @@ def get_user_by_alnum(user_alnum):
 
 @employee_today.route("/api/abr", methods=["GET"])
 def get_abr_data():
+    """Get activity rates from ABR table"""
     try:
+        # Direct SQL query
         result = db.session.execute(text("SELECT name, rate, applies_to FROM abr"))
-        return jsonify([{'name': r.name, 'rate': float(r.rate), 'applies_to': r.applies_to} for r in result]), 200
-    except:
+        
+        # Convert to list of dictionaries explicitly
+        data = []
+        for row in result:
+            data.append({
+                'name': str(row.name),
+                'rate': float(row.rate),
+                'applies_to': str(row.applies_to) if row.applies_to else "Other"
+            })
+        
+        return jsonify(data), 200
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        # Return an empty list instead of crashing, so the frontend doesn't break
         return jsonify([]), 200
