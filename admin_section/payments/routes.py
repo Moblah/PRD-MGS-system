@@ -6,7 +6,7 @@ from models.user import db, User
 from models.activity import Activity
 from models.payment import PaymentTransaction
 
-# Fixed Blueprint definition
+# CORRECT: Import Blueprint from flask
 admin_payments = Blueprint('admin_payments', __name__)
 
 @admin_payments.route("/api/admin/payments/calculate/<string:month_name>", methods=["GET"])
@@ -16,20 +16,20 @@ def calculate_payouts(month_name):
         date_obj = datetime.strptime(month_name, "%b %Y")
         search_pattern = date_obj.strftime("%Y-%m")
     except:
-        return jsonify({"error": "Invalid date format"}), 400
+        return jsonify({"error": "Date format error"}), 400
 
-    # Get employees only
+    # PULLS LIVE DATA FROM YOUR USER TABLE
     employees = User.query.filter_by(role='employee').all()
     report = []
 
     for emp in employees:
-        # 1. Fetch WORK DONE from existing activities table
+        # PULLS LIVE SUM FROM YOUR ACTIVITIES TABLE
         earned = db.session.query(func.sum(Activity.amount)).filter(
             Activity.created_by == emp.user_alnum,
             cast(Activity.time_date, String).like(f"{search_pattern}%")
         ).scalar() or 0
 
-        # 2. Fetch PAYMENTS RECORDED by admin
+        # PULLS RECORDED PAYMENTS
         paid = db.session.query(func.sum(PaymentTransaction.amount_paid)).filter(
             PaymentTransaction.user_alnum == emp.user_alnum,
             PaymentTransaction.batch_month == month_name
@@ -52,16 +52,12 @@ def calculate_payouts(month_name):
 @cross_origin()
 def record_payment():
     data = request.json
-    try:
-        new_pay = PaymentTransaction(
-            user_alnum=data['user_alnum'],
-            batch_month=data['batch_month'],
-            amount_paid=float(data['amount']),
-            reference=data.get('reference', 'Cash')
-        )
-        db.session.add(new_pay)
-        db.session.commit()
-        return jsonify({"message": "Payment recorded"}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+    new_pay = PaymentTransaction(
+        user_alnum=data['user_alnum'],
+        batch_month=data['batch_month'],
+        amount_paid=float(data['amount']),
+        reference=data.get('reference', 'Admin Entry')
+    )
+    db.session.add(new_pay)
+    db.session.commit()
+    return jsonify({"status": "success"}), 201
