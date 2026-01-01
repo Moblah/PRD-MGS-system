@@ -39,6 +39,7 @@ def create_app():
     app.register_blueprint(admin_dashboard_bp)
     app.register_blueprint(monthly_reports_bp)
     app.register_blueprint(admin_payments)
+    
 
     # Create tables if they don't exist
     with app.app_context():
