@@ -1,11 +1,16 @@
-# routes/admin_payments.py
-from flask import Blueprint, request, jsonify
+# admin_section/payments/routes.py
+
+from flask import Blueprint, request, jsonify # <--- Import Blueprint from flask
+from flask_cors import cross_origin
 from sqlalchemy import func, extract, cast, String
-from models.user import db, User
+from datetime import datetime
+from models.user import db, User # <--- Keep db here for queries
 from models.activity import Activity
 from models.payment import PaymentTransaction
 
-admin_payments = Blueprint('admin_payments', __name__)
+# CHANGE THIS LINE: Remove 'db.' before Blueprint
+admin_payments = Blueprint('admin_payments', __name__) 
+
 
 @admin_payments.route("/api/admin/payouts/<int:year>/<int:month>", methods=["GET"])
 def get_payouts(year, month):
