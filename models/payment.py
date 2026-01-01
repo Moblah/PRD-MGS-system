@@ -1,11 +1,11 @@
-from models.user import db
+from .user import db
 from datetime import datetime
 
 class PaymentBatch(db.Model):
     __tablename__ = 'payment_batches'
     id = db.Column(db.Integer, primary_key=True)
-    batch_month = db.Column(db.String(20), nullable=False, unique=True) # e.g., "Jan 2026"
-    status = db.Column(db.String(20), default='Draft')
+    batch_month = db.Column(db.String(20), nullable=False, unique=True) # e.g., "Dec 2025"
+    status = db.Column(db.String(20), default='Draft') # Draft, Paid
     total_amount = db.Column(db.Float, default=0.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -24,3 +24,4 @@ class PaymentAdjustment(db.Model):
     batch_month = db.Column(db.String(20), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     reason = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
