@@ -8,7 +8,7 @@ from models.user import db, User
 from models.activity import Activity
 from models.payment import PaymentTransaction, PaymentAdjustment
 
-# CORRECT: Blueprint comes from flask, NOT db
+# FIX: Changed 'db.Blueprint' to 'Blueprint' (imported from flask above)
 admin_payments = Blueprint('admin_payments', __name__)
 
 @admin_payments.route("/api/admin/payments/calculate/<string:month_name>", methods=["GET"])
@@ -20,24 +20,24 @@ def calculate_payouts(month_name):
     except:
         return jsonify({"error": "Invalid month format"}), 400
 
-    # Only include users whose role is 'employee'
+    # Ensure role is 'employee'
     employees = User.query.filter_by(role='employee').all()
     report = []
 
     for emp in employees:
-        # 1. EARNINGS: Total from activities
+        # 1. EARNINGS: Sum from activities table
         earned = db.session.query(func.sum(Activity.amount)).filter(
             Activity.created_by == emp.user_alnum,
             cast(Activity.time_date, String).like(f"{search_pattern}%")
         ).scalar() or 0
 
-        # 2. ADJUSTMENTS: Bonuses or penalties
+        # 2. ADJUSTMENTS: Bonuses/Penalties
         adjs = db.session.query(func.sum(PaymentAdjustment.amount)).filter(
             PaymentAdjustment.user_alnum == emp.user_alnum,
             PaymentAdjustment.batch_month == month_name
         ).scalar() or 0
 
-        # 3. BALANCE: Subtract what was already recorded as paid
+        # 3. BALANCE: Real-time subtraction of recorded payments
         paid = db.session.query(func.sum(PaymentTransaction.amount_paid)).filter(
             PaymentTransaction.user_alnum == emp.user_alnum,
             PaymentTransaction.batch_month == month_name
@@ -69,4 +69,4 @@ def record_payment():
     )
     db.session.add(new_pay)
     db.session.commit()
-    return jsonify({"message": "Payment recorded successfully"}), 201
+    return jsonify({"message": "Payment recorded"}), 201
