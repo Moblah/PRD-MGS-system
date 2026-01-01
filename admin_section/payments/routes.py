@@ -1,11 +1,15 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, request, jsonify
+from flask_cors import cross_origin
+from sqlalchemy import func, cast, String
+from datetime import datetime
+
+# Import your db and models
 from models.user import db, User
 from models.activity import Activity
-from models.payment import PaymentTransaction, PaymentAdjustment
-from sqlalchemy import func
-from flask_cors import cross_origin
+from models.payment import PaymentBatch, PaymentAdjustment, PaymentTransaction
 
-admin_reports = Blueprint('admin_reports', __name__)
+# Define the blueprint correctly here:
+admin_payments = Blueprint('admin_payments', __name__)
 
 @admin_reports.route("/api/admin/reports/summary", methods=["GET"])
 @cross_origin()
