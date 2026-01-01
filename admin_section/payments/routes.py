@@ -1,21 +1,18 @@
-# admin_section/payments/routes.py
-
-from flask import Blueprint, request, jsonify # <--- Import Blueprint from flask
+from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
-from sqlalchemy import func, extract, cast, String
+from sqlalchemy import func, extract
 from datetime import datetime
-from models.user import db, User # <--- Keep db here for queries
+from models.user import db, User
 from models.activity import Activity
 from models.payment import PaymentTransaction
 
-# CHANGE THIS LINE: Remove 'db.' before Blueprint
-admin_payments = Blueprint('admin_payments', __name__) 
-
-
+# Fixed: Blueprint imported from flask and used without 'db.' prefix
+admin_payments = Blueprint('admin_payments', __name__)
 
 @admin_payments.route("/api/admin/payouts/<int:year>/<int:month>", methods=["GET"])
+@cross_origin()
 def get_payouts(year, month):
-    # 1. Fetch all users with role 'Employee'
+    # 1. Fetch all users with role 'employee' (Matches your requirement)
     employees = User.query.filter(User.role.ilike('employee')).all()
     report = []
 
@@ -33,6 +30,7 @@ def get_payouts(year, month):
             PaymentTransaction.batch_period == f"{month}-{year}"
         ).scalar() or 0
 
+        # Only include if there is financial activity
         if earned > 0 or paid > 0:
             report.append({
                 "name": emp.name,
@@ -41,17 +39,23 @@ def get_payouts(year, month):
                 "paid": float(paid),
                 "balance": float(earned - paid)
             })
+            
     return jsonify(report), 200
 
 @admin_payments.route("/api/admin/record-payment", methods=["POST"])
+@cross_origin()
 def record_payment():
-    data = request.json
-    new_pay = PaymentTransaction(
-        user_alnum=data['user_alnum'],
-        amount_paid=float(data['amount']),
-        batch_period=data['period'],
-        reference=data.get('reference', 'Admin Payout')
-    )
-    db.session.add(new_pay)
-    db.session.commit()
-    return jsonify({"status": "success"}), 201
+    try:
+        data = request.json
+        new_pay = PaymentTransaction(
+            user_alnum=data['user_alnum'],
+            amount_paid=float(data['amount']),
+            batch_period=data['period'],
+            reference=data.get('reference', 'Admin Payout')
+        )
+        db.session.add(new_pay)
+        db.session.commit()
+        return jsonify({"status": "success"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
