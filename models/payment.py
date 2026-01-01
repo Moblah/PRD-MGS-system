@@ -17,3 +17,13 @@ class PaymentAdjustment(db.Model):
     batch_month = db.Column(db.String(20), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     reason = db.Column(db.String(255))
+
+
+class PaymentTransaction(db.Model):
+    __tablename__ = 'payment_transactions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_alnum = db.Column(db.String(50), nullable=False) # e.g., '9G67A'
+    amount_paid = db.Column(db.Float, nullable=False)
+    batch_period = db.Column(db.String(20), nullable=False) # Format: 'MM-YYYY'
+    reference = db.Column(db.String(100)) # e.g., 'M-Pesa'
+    date_paid = db.Column(db.DateTime, default=datetime.utcnow)
