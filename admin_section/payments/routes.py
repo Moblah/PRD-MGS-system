@@ -43,17 +43,13 @@ def get_payouts(year, month):
 def record_payment():
     data = request.json
     try:
-        # Check logs in Render to see this output:
-        print(f"DEBUG: Received payment data -> {data}")
-
-        # Ensure we have the minimum required data
-        if not data.get('user_alnum') or not data.get('amount'):
-            return jsonify({"error": "Missing user_alnum or amount"}), 400
+        # We get the 'period' directly from the frontend data
+        period_value = str(data.get('period', 'unknown'))
 
         new_pay = PaymentTransaction(
             user_alnum=str(data.get('user_alnum')),
-            amount_paid=float(data.get('amount')),
-            batch_period=str(data.get('period', f"{month}-{year}")),
+            amount_paid=float(data.get('amount', 0)),
+            batch_period=period_value, 
             reference=data.get('reference', 'Admin Payout')
         )
         db.session.add(new_pay)
@@ -61,5 +57,6 @@ def record_payment():
         return jsonify({"status": "success"}), 201
     except Exception as e:
         db.session.rollback()
-        print(f"ERROR: {str(e)}") # This will show up in Render Logs
+        # This will now show the actual error in Render logs if it fails again
+        print(f"Deployment Error: {str(e)}") 
         return jsonify({"error": str(e)}), 400
