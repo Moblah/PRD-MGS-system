@@ -12,6 +12,7 @@ from models.payment import PaymentTransaction
 admin_payments = Blueprint('admin_payments', __name__) 
 
 
+
 @admin_payments.route("/api/admin/payouts/<int:year>/<int:month>", methods=["GET"])
 def get_payouts(year, month):
     # 1. Fetch all users with role 'Employee'
