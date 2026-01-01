@@ -38,25 +38,21 @@ def get_payouts(year, month):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@admin_payments.route("/api/admin/record-payment", methods=["POST"])
-@cross_origin()
-def record_payment():
-    data = request.json
-    try:
-        # We get the 'period' directly from the frontend data
-        period_value = str(data.get('period', 'unknown'))
-
-        new_pay = PaymentTransaction(
-            user_alnum=str(data.get('user_alnum')),
-            amount_paid=float(data.get('amount', 0)),
-            batch_period=period_value, 
-            reference=data.get('reference', 'Admin Payout')
-        )
-        db.session.add(new_pay)
-        db.session.commit()
-        return jsonify({"status": "success"}), 201
-    except Exception as e:
-        db.session.rollback()
-        # This will now show the actual error in Render logs if it fails again
-        print(f"Deployment Error: {str(e)}") 
-        return jsonify({"error": str(e)}), 400
+    @admin_payments.route("/api/admin/record-payment", methods=["POST"])
+    @cross_origin()
+    def record_payment():
+        data = request.json
+        try:
+            # Create the record using 'batch_month'
+            new_pay = PaymentTransaction(
+                user_alnum=str(data.get('user_alnum')),
+                amount_paid=float(data.get('amount', 0)),
+                batch_month=str(data.get('period')), # Frontend 'period' -> Backend 'batch_month'
+                reference=data.get('reference', 'Admin Payout')
+            )
+            db.session.add(new_pay)
+            db.session.commit()
+            return jsonify({"status": "success"}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 400
