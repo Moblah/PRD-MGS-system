@@ -2,39 +2,42 @@ from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 from sqlalchemy import func, cast, String
 from datetime import datetime
+
+# Import db and Models
 from models.user import db, User
 from models.activity import Activity
 from models.payment import PaymentTransaction, PaymentAdjustment
 
+# CORRECT: Blueprint comes from flask, NOT db
 admin_payments = Blueprint('admin_payments', __name__)
 
 @admin_payments.route("/api/admin/payments/calculate/<string:month_name>", methods=["GET"])
 @cross_origin()
 def calculate_payouts(month_name):
-    # 1. EARNINGS PHASE: Match Activity.created_by to User.user_alnum
     try:
         date_obj = datetime.strptime(month_name, "%b %Y")
         search_pattern = date_obj.strftime("%Y-%m")
     except:
-        return jsonify({"error": "Invalid date"}), 400
+        return jsonify({"error": "Invalid month format"}), 400
 
-    employees = User.query.filter_by(role='Employee').all()
+    # Only include users whose role is 'employee'
+    employees = User.query.filter_by(role='employee').all()
     report = []
 
     for emp in employees:
-        # Sum work done in 'activities' table
+        # 1. EARNINGS: Total from activities
         earned = db.session.query(func.sum(Activity.amount)).filter(
             Activity.created_by == emp.user_alnum,
             cast(Activity.time_date, String).like(f"{search_pattern}%")
         ).scalar() or 0
 
-        # Add manual adjustments
+        # 2. ADJUSTMENTS: Bonuses or penalties
         adjs = db.session.query(func.sum(PaymentAdjustment.amount)).filter(
             PaymentAdjustment.user_alnum == emp.user_alnum,
             PaymentAdjustment.batch_month == month_name
         ).scalar() or 0
 
-        # 2. BALANCE PHASE: Subtract amount_paid from 'payment_transactions'
+        # 3. BALANCE: Subtract what was already recorded as paid
         paid = db.session.query(func.sum(PaymentTransaction.amount_paid)).filter(
             PaymentTransaction.user_alnum == emp.user_alnum,
             PaymentTransaction.batch_month == month_name
@@ -51,12 +54,12 @@ def calculate_payouts(month_name):
                 "amount_paid": float(paid),
                 "balance": float(remaining)
             })
+
     return jsonify(report), 200
 
 @admin_payments.route("/api/admin/payments/record", methods=["POST"])
 @cross_origin()
 def record_payment():
-    # 3. RECORDING PHASE: Save the payout to the ledger
     data = request.json
     new_pay = PaymentTransaction(
         user_alnum=data['user_alnum'],
@@ -66,4 +69,4 @@ def record_payment():
     )
     db.session.add(new_pay)
     db.session.commit()
-    return jsonify({"message": "Payment successful"}), 201
+    return jsonify({"message": "Payment recorded successfully"}), 201

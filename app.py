@@ -15,6 +15,7 @@ from admin_section.dashboard.admin_dashboard import admin_dashboard_bp
 from admin_section.monthly_reports.monthly_reports import monthly_reports_bp
 from models.payment import PaymentBatch, PaymentAdjustment # <--- ADD THIS
 from admin_section.payments.routes import admin_payments  # <--- ADD THIS
+from admin_section.reports.routes import admin_reports
 
 
 def create_app():
@@ -39,6 +40,7 @@ def create_app():
     app.register_blueprint(admin_dashboard_bp)
     app.register_blueprint(monthly_reports_bp)
     app.register_blueprint(admin_payments)
+    app.register_blueprint(admin_reports)
 
     # Create tables if they don't exist
     with app.app_context():
