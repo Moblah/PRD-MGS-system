@@ -15,6 +15,7 @@ from employee_section.my_reports.my_reports import my_reports_bp
 from admin_section.dashboard.admin_dashboard import admin_dashboard_bp
 from admin_section.monthly_reports.monthly_reports import monthly_reports_bp
 from admin_section.payments.routes import admin_payments
+from employee_section.my_bonuses.routes import employee_portal
 
 
 def create_app():
@@ -39,6 +40,7 @@ def create_app():
     app.register_blueprint(admin_dashboard_bp)
     app.register_blueprint(monthly_reports_bp)
     app.register_blueprint(admin_payments)
+    app.register_blueprint(employee_portal)
     
 
     # Create tables if they don't exist
