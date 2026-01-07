@@ -37,7 +37,7 @@ def get_my_bonuses(user_alnum, year, month):
             "date": a.time_date.strftime("%d-%b"), # e.g., 02-Jan
             "activity": getattr(a, 'activity', 'System Task'),
             "quantity": 1,
-            "rate": f"KES {float(a.amount):,.0f}",
+            "rate": f"$ {float(a.amount):,.0f}",
             "amount": float(a.amount)
         } for a in activities]
 
