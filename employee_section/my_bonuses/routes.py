@@ -35,7 +35,7 @@ def get_my_bonuses(user_alnum, year, month):
         # 4. Map the activities for the React frontend table
         breakdown = [{
             "date": a.time_date.strftime("%d-%b"), # e.g., 02-Jan
-            "activity": getattr(a, 'activity_name', 'System Task'),
+            "activity": getattr(a, 'activity', 'System Task'),
             "quantity": 1,
             "rate": f"KES {float(a.amount):,.0f}",
             "amount": float(a.amount)
