@@ -58,8 +58,8 @@ def get_admin_dashboard():
             Activity.activity,
             Activity.qty,
             Activity.amount,
-            User.name,
-            Abr.applies_to
+            User.name.label("employee_name"), # Labeled for clarity
+            Abr.name.label("abr_name")        # Changed from Abr.applies_to to Abr.name
         ).join(
             User, Activity.created_by == User.user_alnum
         ).outerjoin(
@@ -72,11 +72,12 @@ def get_admin_dashboard():
         for sub in recent_submissions_query:
             recent_submissions.append({
                 "time": sub.time_date.strftime('%H:%M') if sub.time_date else "",
-                "employee": sub.name,
+                "employee": sub.employee_name,
                 "date": sub.time_date.strftime('%m-%d') if sub.time_date else "",
-                "roleType": sub.applies_to if sub.applies_to else "Unknown",
+                # Using the name from Abr table, falling back to the Activity name if Abr record is missing
+                "roleType": sub.abr_name if sub.abr_name else sub.activity, 
                 "items": int(sub.qty) if sub.qty else 0,
-                "total": f" {sub.amount:,.0f}" if sub.amount else "0"
+                "total": f"{sub.amount:,.0f}" if sub.amount else "0"
             })
 
         # ===== 7. MISSING REPORTS DETAILS =====
