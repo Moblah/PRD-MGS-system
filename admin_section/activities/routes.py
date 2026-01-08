@@ -10,39 +10,49 @@ admin_activities = Blueprint('admin_activities', __name__)
 def generate_abr_id():
     return 'ABR-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 
-# ✅ CREATE activity
-@admin_activities.route("/api/admin/activities", methods=["POST"])
+@admin_activities.route("/api/admin/activities", methods=["GET", "POST", "OPTIONS"])
 @cross_origin()
-def create_activity():
-    data = request.get_json()
-    try:
-        raw_rate = str(data.get('rate', 0))
-        numeric_rate = float(
-            ''.join(filter(lambda x: x.isdigit() or x == '.', raw_rate))
-        )
+def manage_activities():
+    if request.method == "OPTIONS":
+        return jsonify({"success": True}), 200
 
-        new_activity = Abr(
-            abr_id=generate_abr_id(),
-            name=data.get('name'),
-            applies_to=data.get('appliesTo'),
-            # If your Database model HAS a 'rule' column that is NOT NULL, 
-            # pass an empty string or "fixed" here to satisfy the DB.
-            rule=data.get('rule', ''), 
-            rate=numeric_rate,
-            from_date=data.get('effectiveFrom'),
-            created_by=data.get('admin_id', 'ADMIN-01')
-        )
+    # ✅ ADDED: Fetch ALL records (ID 1, 2, 3, 7, 13, 14 etc.)
+    if request.method == "GET":
+        try:
+            activities = Abr.query.all()
+            # This uses your model's to_dict() method to return all fields including 'rule'
+            return jsonify([a.to_dict() for a in activities]), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
-        db.session.add(new_activity)
-        db.session.commit()
+    # ✅ CREATE activity
+    if request.method == "POST":
+        data = request.get_json()
+        try:
+            raw_rate = str(data.get('rate', 0))
+            numeric_rate = float(
+                ''.join(filter(lambda x: x.isdigit() or x == '.', raw_rate))
+            )
 
-        return jsonify(new_activity.to_dict()), 201
+            new_activity = Abr(
+                abr_id=generate_abr_id(),
+                name=data.get('name'),
+                applies_to=data.get('appliesTo'),
+                # We handle empty rules from the UI, but keep existing ones in DB
+                rule=data.get('rule', ''), 
+                rate=numeric_rate,
+                from_date=data.get('effectiveFrom'),
+                created_by=data.get('admin_id', 'ADMIN-01')
+            )
 
-    except Exception as e:
-        db.session.rollback()
-        # This will now show the actual DB error in your Render logs
-        print(f"Error creating activity: {str(e)}") 
-        return jsonify({"error": str(e)}), 500
+            db.session.add(new_activity)
+            db.session.commit()
+            return jsonify(new_activity.to_dict()), 201
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error creating activity: {str(e)}") 
+            return jsonify({"error": str(e)}), 500
 
 
 @admin_activities.route(
