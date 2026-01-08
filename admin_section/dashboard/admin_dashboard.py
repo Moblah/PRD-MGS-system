@@ -58,8 +58,9 @@ def get_admin_dashboard():
             Activity.activity,
             Activity.qty,
             Activity.amount,
-            User.name.label("employee_name"), # Labeled for clarity
-            Abr.name.label("abr_name")        # Changed from Abr.applies_to to Abr.name
+            Activity.comment,         # 1. Added comment from Activity table
+            User.name.label("employee_name"),
+            Abr.name.label("abr_name")
         ).join(
             User, Activity.created_by == User.user_alnum
         ).outerjoin(
@@ -70,12 +71,19 @@ def get_admin_dashboard():
 
         recent_submissions = []
         for sub in recent_submissions_query:
+            # 2. Logic to concatenate Activity + Comment
+            # We check if a comment exists to avoid trailing colons
+            display_activity = sub.abr_name if sub.abr_name else sub.activity
+            if sub.comment and sub.comment.strip():
+                full_description = f"{display_activity} : {sub.comment}"
+            else:
+                full_description = display_activity
+
             recent_submissions.append({
                 "time": sub.time_date.strftime('%H:%M') if sub.time_date else "",
-                "employee": sub.employee_name,
+                "employee": sub.name, # Using sub.name from the User join
                 "date": sub.time_date.strftime('%m-%d') if sub.time_date else "",
-                # Using the name from Abr table, falling back to the Activity name if Abr record is missing
-                "roleType": sub.abr_name if sub.abr_name else sub.activity, 
+                "roleType": full_description,  # 3. Now shows "Activity : Comment"
                 "items": int(sub.qty) if sub.qty else 0,
                 "total": f"{sub.amount:,.0f}" if sub.amount else "0"
             })
