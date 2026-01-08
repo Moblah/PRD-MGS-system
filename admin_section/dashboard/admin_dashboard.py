@@ -58,9 +58,8 @@ def get_admin_dashboard():
             Activity.activity,
             Activity.qty,
             Activity.amount,
-            Activity.comment,                  # 1. Added comment from Activity table
-            User.name.label("employee_name"),
-            Abr.name.label("abr_name")
+            User.name.label("employee_name"), # Labeled for clarity
+            Abr.name.label("abr_name")        # Changed from Abr.applies_to to Abr.name
         ).join(
             User, Activity.created_by == User.user_alnum
         ).outerjoin(
@@ -71,24 +70,25 @@ def get_admin_dashboard():
 
         recent_submissions = []
         for sub in recent_submissions_query:
-            # Determine the activity name (Priority: Abr Table -> Activity Table)
-            base_activity = sub.abr_name if sub.abr_name else sub.activity
-            
-            # 2. Concatenate Activity and Comment
-            # Result: "Activity Name : Comment" or just "Activity Name" if no comment
-            if sub.comment and sub.comment.strip():
-                combined_display = f"{base_activity} : {sub.comment}"
-            else:
-                combined_display = base_activity
-
             recent_submissions.append({
                 "time": sub.time_date.strftime('%H:%M') if sub.time_date else "",
                 "employee": sub.employee_name,
                 "date": sub.time_date.strftime('%m-%d') if sub.time_date else "",
-                "roleType": combined_display,         # 3. Sent to the same key used by frontend
+                # Using the name from Abr table, falling back to the Activity name if Abr record is missing
+                "roleType": sub.abr_name if sub.abr_name else sub.activity, 
                 "items": int(sub.qty) if sub.qty else 0,
                 "total": f"{sub.amount:,.0f}" if sub.amount else "0"
             })
+
+        # ===== 7. MISSING REPORTS DETAILS =====
+        missing_employees = []
+        for employee in all_employees:
+            if employee.user_alnum not in submitted_employee_ids:
+                missing_employees.append({
+                    "user_alnum": employee.user_alnum,
+                    "name": employee.name,
+                    "team": employee.team
+                })
 
         # ===== 8. YESTERDAY'S COMPARISON =====
         yesterday = filter_date - timedelta(days=1)
