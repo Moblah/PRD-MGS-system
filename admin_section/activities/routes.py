@@ -10,23 +10,18 @@ admin_activities = Blueprint('admin_activities', __name__)
 def generate_abr_id():
     return 'ABR-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 
-
 @admin_activities.route("/api/admin/activities", methods=["GET", "POST", "OPTIONS"])
 @cross_origin()
 def manage_activities():
-
     if request.method == "OPTIONS":
         return jsonify({"success": True}), 200
 
-    # ✅ GET all activities
     if request.method == "GET":
         activities = Abr.query.all()
         return jsonify([a.to_dict() for a in activities]), 200
 
-    # ✅ CREATE activity
     if request.method == "POST":
         data = request.get_json()
-
         try:
             raw_rate = str(data.get('rate', 0))
             numeric_rate = float(
@@ -37,7 +32,7 @@ def manage_activities():
                 abr_id=generate_abr_id(),
                 name=data.get('name'),
                 applies_to=data.get('appliesTo'),
-                rule=data.get('rule'),
+                # Rule removed from here
                 rate=numeric_rate,
                 from_date=data.get('effectiveFrom'),
                 created_by=data.get('admin_id', 'ADMIN-01')
@@ -45,12 +40,13 @@ def manage_activities():
 
             db.session.add(new_activity)
             db.session.commit()
-
             return jsonify(new_activity.to_dict()), 201
 
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": str(e)}), 500
+
+
 @admin_activities.route(
     "/api/admin/activities/delete/<string:abr_id>",
     methods=["DELETE", "OPTIONS"]
