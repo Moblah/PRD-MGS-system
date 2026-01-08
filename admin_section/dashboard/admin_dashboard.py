@@ -52,30 +52,34 @@ def get_admin_dashboard():
         ).first()
         today_bonus_total = float(today_bonus_result[0]) if today_bonus_result[0] else 0.0
 
-        # ===== 6. RECENT SUBMISSIONS =====
+    # ===== 6. RECENT SUBMISSIONS (Direct from Activity Table) =====
         recent_submissions_query = db.session.query(
             Activity.time_date,
             Activity.activity,
             Activity.qty,
             Activity.amount,
-            User.name.label("employee_name"), # Labeled for clarity
-            Abr.name.label("abr_name")        # Changed from Abr.applies_to to Abr.name
+            Activity.comment,
+            User.name.label("employee_name")
         ).join(
             User, Activity.created_by == User.user_alnum
-        ).outerjoin(
-            Abr, Activity.activity == Abr.name
         ).filter(
             func.date(Activity.time_date) == filter_date
         ).order_by(Activity.time_date.desc()).limit(10).all()
 
         recent_submissions = []
         for sub in recent_submissions_query:
+            # Concatenate activity + comment (e.g., "Registration D2 : D2,A1")
+            # We check if comment exists to avoid showing a lonely colon ":"
+            if sub.comment and str(sub.comment).strip():
+                combined_activity = f"{sub.activity} : {sub.comment}"
+            else:
+                combined_activity = sub.activity
+
             recent_submissions.append({
                 "time": sub.time_date.strftime('%H:%M') if sub.time_date else "",
                 "employee": sub.employee_name,
                 "date": sub.time_date.strftime('%m-%d') if sub.time_date else "",
-                # Using the name from Abr table, falling back to the Activity name if Abr record is missing
-                "roleType": sub.abr_name if sub.abr_name else sub.activity, 
+                "roleType": combined_activity, # This is your Activity + Comment
                 "items": int(sub.qty) if sub.qty else 0,
                 "total": f"{sub.amount:,.0f}" if sub.amount else "0"
             })
